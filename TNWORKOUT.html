@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NS 6-Week Transformation</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080808;--s1:#111;--s2:#1a1a1a;--s3:#242424;--border:#2e2e2e;--accent:#e8ff00;--orange:#ff5500;--blue:#00aaff;--green:#00e676;--red:#ff1744;--text:#f0f0f0;--muted:#606060;--font-d:'Bebas Neue',sans-serif;--font-b:'Barlow',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);display:flex;flex-direction:column}
+/* HEADER */
+.hdr{background:var(--s1);border-bottom:2px solid var(--accent);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:50}
+.logo{font-family:var(--font-d);font-size:1.4rem;letter-spacing:4px;color:var(--accent);line-height:1}
+.logo span{color:var(--muted);font-size:.7rem;letter-spacing:2px;display:block}
+.streak{background:var(--accent);color:#000;font-family:var(--font-d);font-size:.95rem;letter-spacing:2px;padding:5px 10px;border-radius:4px;text-align:center;line-height:1.1}
+.streak small{display:block;font-family:var(--font-b);font-size:.48rem;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+/* TABS */
+.tabs{background:var(--s1);border-bottom:1px solid var(--border);display:flex;flex-shrink:0}
+.tab{flex:1;padding:11px 4px;font-family:var(--font-b);font-size:.62rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;background:none;border:none;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+/* MAIN */
+.main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.view{display:none;padding:14px;max-width:640px;margin:0 auto;padding-bottom:50px}
+.view.active{display:block}
+/* WEEK SELECTOR */
+.week-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
+.week-row::-webkit-scrollbar{display:none}
+.wk-chip{flex-shrink:0;background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:7px 12px;cursor:pointer;font-family:var(--font-d);font-size:.95rem;letter-spacing:2px;color:var(--muted);transition:all .2s;white-space:nowrap}
+.wk-chip.active{background:var(--accent);border-color:var(--accent);color:#000}
+.wk-chip.done{border-color:var(--green);color:var(--green)}
+/* DAY SCROLLER */
+.day-scroll{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}
+.day-scroll::-webkit-scrollbar{display:none}
+.day-chip{flex-shrink:0;background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:7px 11px;cursor:pointer;transition:all .2s;text-align:center;min-width:52px}
+.day-chip.active{background:var(--accent);border-color:var(--accent)}
+.day-chip.active .dc-num,.day-chip.active .dc-name{color:#000}
+.day-chip.done{border-color:var(--green)}
+.day-chip.done .dc-num{color:var(--green)}
+.day-chip.rest{opacity:.5}
+.dc-num{font-family:var(--font-d);font-size:1.1rem;line-height:1;color:var(--text)}
+.dc-name{font-size:.5rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:2px;white-space:nowrap}
+/* WORKOUT HEADER */
+.wk-hdr{margin-bottom:14px}
+.wk-title{font-family:var(--font-d);font-size:2rem;letter-spacing:3px;color:var(--accent);line-height:1}
+.wk-sub{font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:3px}
+.wk-sub span{color:var(--orange)}
+/* DAILY NOTE */
+.daily-note{background:var(--s2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:.75rem;color:var(--muted);line-height:1.5}
+.daily-note b{color:var(--accent)}
+/* BLOCK */
+.block{background:var(--s1);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.block-hdr{padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.block-title{font-family:var(--font-d);font-size:1rem;letter-spacing:2px;flex:1}
+.badge{font-size:.55rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 7px;border-radius:4px;flex-shrink:0}
+.badge-circuit{background:rgba(232,255,0,.12);color:var(--accent)}
+.badge-amrap{background:rgba(232,255,0,.08);color:#b8cc00}
+.badge-sets{background:rgba(255,85,0,.12);color:var(--orange)}
+.badge-cardio{background:rgba(0,230,118,.12);color:var(--green)}
+.badge-hold{background:rgba(0,170,255,.12);color:var(--blue)}
+.badge-rest{background:rgba(96,96,96,.2);color:var(--muted)}
+.badge-ds{background:rgba(255,85,0,.08);color:#ff8844}
+.badge-ss{background:rgba(0,170,255,.08);color:#44aaff}
+.badge-hiit{background:rgba(255,23,68,.15);color:var(--red)}
+/* TIMER */
+.timer-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--s2);border-bottom:1px solid var(--border)}
+.timer-face{position:relative;width:48px;height:48px;flex-shrink:0}
+.timer-face svg{width:48px;height:48px}
+circle{fill:none;stroke-width:3}
+.ring-bg{stroke:var(--border)}
+.ring-fill{stroke:var(--accent);stroke-linecap:round;transform-origin:center;transform:rotate(-90deg)}
+.ring-rest{stroke:var(--orange)}
+.timer-txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:.85rem;letter-spacing:1px;color:var(--accent)}
+.timer-txt.rest-c{color:var(--orange)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+.blink{animation:blink .4s infinite}
+.timer-ctrls{display:flex;gap:5px;flex:1}
+.tbtn{flex:1;padding:8px 3px;border:none;border-radius:7px;font-family:var(--font-b);font-size:.62rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.tbtn:active{transform:scale(.95)}
+.tbtn-go{background:var(--accent);color:#000}
+.tbtn-rst{background:var(--s3);color:var(--text);border:1px solid var(--border)}
+.tbtn-rest{background:var(--orange);color:#fff}
+/* EX LIST */
+.ex-list{padding:2px 0}
+.ex-row{padding:9px 14px;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--border)}
+.ex-row:last-child{border-bottom:none}
+.ex-chk{width:20px;height:20px;border:2px solid var(--border);border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;cursor:pointer}
+.ex-chk.done{background:var(--green);border-color:var(--green)}
+.ex-body{flex:1;cursor:pointer}
+.ex-name{font-size:.84rem;font-weight:500;transition:all .2s}
+.ex-name.done{text-decoration:line-through;color:var(--muted)}
+.ex-detail{font-size:.62rem;color:var(--muted);margin-top:1px}
+.ex-log{display:flex;gap:5px;flex-shrink:0}
+.log-field{display:flex;flex-direction:column;align-items:center;gap:2px}
+.log-inp{width:48px;background:var(--s2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.78rem;padding:5px 4px;text-align:center;font-family:var(--font-b)}
+.log-lbl{font-size:.48rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+/* SETS */
+.sets-body{padding:10px 14px}
+.set-dots{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.set-dot{width:38px;height:38px;border-radius:50%;border:2px solid var(--border);background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;cursor:pointer;transition:all .2s;color:var(--muted)}
+.set-dot.done{background:var(--orange);border-color:var(--orange);color:#fff}
+.set-fields{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.sf{display:flex;flex-direction:column;gap:3px}
+.sf label{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.sf input{background:var(--s2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:.85rem;padding:7px 10px;font-family:var(--font-b);width:100%}
+/* ROUNDS */
+.rounds-row{display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--s2);border-top:1px solid var(--border)}
+.rounds-lbl{font-size:.6rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);flex:1}
+.rnd-btn{width:34px;height:34px;border-radius:50%;border:2px solid var(--border);background:var(--s3);color:var(--text);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.rnd-btn:active{background:var(--accent);color:#000;border-color:var(--accent)}
+.rounds-val{font-family:var(--font-d);font-size:1.5rem;color:var(--accent);min-width:28px;text-align:center}
+/* CARDIO BLOCK */
+.cardio-body{padding:12px 14px}
+.cardio-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.c-opt{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:10px 8px;text-align:center;cursor:pointer;transition:all .2s}
+.c-opt.sel{border-color:var(--green);background:rgba(0,230,118,.06)}
+.c-icon{font-size:1.3rem;margin-bottom:3px}
+.c-name{font-size:.7rem;font-weight:600}
+.c-sub{font-size:.58rem;color:var(--muted);margin-top:1px}
+.cardio-stats{background:var(--s2);border-radius:9px;overflow:hidden}
+.cs-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--border)}
+.cs-row:last-child{border-bottom:none}
+.cs-lbl{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.cs-inp{background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.9rem;padding:5px 9px;text-align:right;width:85px;font-family:var(--font-b)}
+/* LOG BTN */
+.log-btn{width:100%;padding:14px;background:var(--accent);color:#000;border:none;border-radius:10px;font-family:var(--font-d);font-size:1.1rem;letter-spacing:3px;cursor:pointer;margin-top:10px;transition:all .2s}
+.log-btn:active{transform:scale(.98)}
+.log-btn.logged{background:var(--green)}
+.notes-area{width:100%;background:var(--s1);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:var(--font-b);font-size:.82rem;padding:11px;resize:none;margin-top:8px;min-height:65px}
+/* REST DAY */
+.rest-day{text-align:center;padding:40px 20px}
+.rest-ico{font-size:3rem;margin-bottom:10px}
+.rest-txt{font-family:var(--font-d);font-size:1.6rem;letter-spacing:3px;color:var(--muted)}
+.rest-sub{font-size:.78rem;color:var(--muted);margin-top:8px}
+/* HISTORY */
+.hist-card{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:13px;margin-bottom:9px}
+.hist-date{font-size:.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+.hist-day{font-family:var(--font-d);font-size:1.1rem;letter-spacing:2px;color:var(--accent);margin-bottom:8px}
+.hist-stats{display:flex;gap:14px}
+.hst{text-align:center}
+.hst-val{font-family:var(--font-d);font-size:1.2rem;color:var(--text)}
+.hst-lbl{font-size:.5rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.hist-note{font-size:.7rem;color:var(--muted);margin-top:9px;padding-top:7px;border-top:1px solid var(--border)}
+/* PROGRESS */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px}
+.stat-tile{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:13px}
+.st-val{font-family:var(--font-d);font-size:1.9rem;color:var(--accent);line-height:1}
+.st-lbl{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+.bars{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:16px}
+.bar-wrap{display:flex;flex-direction:column;align-items:center;gap:3px}
+.bar-bg{width:100%;height:52px;background:var(--s1);border-radius:4px;overflow:hidden;display:flex;align-items:flex-end}
+.bar-fill{width:100%;background:var(--accent);border-radius:4px}
+.bar-fill.empty{background:var(--border)}
+.bar-lbl{font-size:.5rem;color:var(--muted);text-transform:uppercase}
+.sec-title{font-family:var(--font-d);font-size:1.2rem;letter-spacing:3px;color:var(--muted)}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--s1);border-radius:18px 18px 0 0;width:100%;max-width:640px;max-height:88vh;overflow-y:auto;padding:18px;transform:translateY(30px);transition:transform .25s;border-top:2px solid var(--accent)}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-title{font-family:var(--font-d);font-size:1.3rem;letter-spacing:3px;color:var(--accent);margin-bottom:14px}
+.modal-btns{display:flex;gap:9px;margin-top:14px}
+.btn-primary{flex:1;padding:13px;background:var(--accent);color:#000;border:none;border-radius:9px;font-family:var(--font-d);font-size:.95rem;letter-spacing:2px;cursor:pointer}
+.btn-cancel{flex:1;padding:13px;background:var(--s2);color:var(--text);border:1px solid var(--border);border-radius:9px;font-family:var(--font-d);font-size:.95rem;letter-spacing:2px;cursor:pointer}
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#000;padding:9px 20px;border-radius:28px;font-weight:700;font-size:.78rem;transition:transform .3s;z-index:999;white-space:nowrap;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+/* UTILS */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+input:focus,textarea:focus{outline:none;border-color:var(--accent)}
+.empty{text-align:center;padding:45px 20px;color:var(--muted)}
+.empty-ico{font-size:2.2rem;margin-bottom:9px}
+.empty-txt{font-size:.82rem}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div><div class="logo">NS GRIND<span>6-WEEK TRANSFORMATION</span></div></div>
+  <div id="streakEl" class="streak">0 🔥<small>Streak</small></div>
+</div>
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('workout',this)">Workout</button>
+  <button class="tab" onclick="switchTab('history',this)">History</button>
+  <button class="tab" onclick="switchTab('progress',this)">Progress</button>
+</div>
+<div class="main">
+  <div id="workoutView" class="view active"></div>
+  <div id="historyView" class="view"></div>
+  <div id="progressView" class="view"></div>
+</div>
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalIfBg(event)"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── PROGRAM DATA ────────────────────────────────────────────────────────────
+const WEEKS = [
+  // WEEK 1
+  { label:'WEEK 1', days:[
+    { day:1, label:'CHEST', note:'50 morning burpees. No rest between circuit exercises. 2 min rest between circuits. Cardio: burn 350 cal as fast as possible.',
+      blocks:[
+        {title:'Circuit 1',type:'circuit',rounds:6,restAfter:120,exercises:[
+          {name:'DB Incline Flys',detail:'x12'},
+          {name:'Sit Ups',detail:'x10'},
+          {name:'DB Incline Press',detail:'x10'}]},
+        {title:'Circuit 2',type:'circuit',rounds:6,restAfter:120,exercises:[
+          {name:'DB Chest Press',detail:'x12'},
+          {name:'Push Ups / Knee Push Ups',detail:'x10'},
+          {name:'Jumping Jacks',detail:'x15'}]},
+        {title:'Set 3 — Machine Chest Press',type:'sets',sets:4,restBetween:90,exercises:[
+          {name:'Machine Chest Press',detail:'4×12 — Rest :90 between sets'}]},
+        {title:'Set 4 — Machine / Cable Flys',type:'amrap',duration:240,exercises:[
+          {name:'Machine or Cable Flys',detail:'AMRAP 4 min'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:2, label:'SHOULDERS', note:'50 morning burpees. No rest between circuit exercises. 2 min rest between circuits. Cardio: burn 350 cal.',
+      blocks:[
+        {title:'Circuit 1',type:'circuit',rounds:6,restAfter:120,exercises:[
+          {name:'Side Lateral Raise',detail:'x12'},
+          {name:'Ball Slams',detail:'x8'},
+          {name:'Front Plate Raise',detail:'x10'}]},
+        {title:'Circuit 2',type:'circuit',rounds:6,restAfter:120,exercises:[
+          {name:'Seated DB Press',detail:'x12'},
+          {name:'Flutter Kicks',detail:'x12 each leg'},
+          {name:'Bent Over Lateral Raise',detail:'x12'}]},
+        {title:'Circuit 3',type:'circuit',rounds:6,restAfter:120,exercises:[
+          {name:'Cable Upright Row',detail:'x12'},
+          {name:'Body Weight Squats',detail:'x10'},
+          {name:'DB Shrugs',detail:'x10'}]},
+        {title:'Set 4 — Machine Side Lateral Raises',type:'sets',sets:3,restBetween:90,exercises:[
+          {name:'Machine Side Lateral Raises',detail:'3×20 — Rest :90 between sets'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:3, label:'LEGS', note:'50 morning burpees. No cardio today.',
+      blocks:[
+        {title:'Set 1 — Body Weight Squats',type:'sets',sets:1,restBetween:0,exercises:[
+          {name:'Bodyweight Squats',detail:'75 total reps'}]},
+        {title:'Set 2 — Leg Extensions',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'Leg Extensions',detail:'4×16 — Rest :60'}]},
+        {title:'Set 3 — Leg Press',type:'sets',sets:4,restBetween:90,exercises:[
+          {name:'Leg Press',detail:'4×12 — Rest :90'}]},
+        {title:'Set 4 — Calf Extensions',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'Calf Extensions',detail:'4×12 — Rest :60'}]},
+        {title:'Set 5 — Single Leg Extensions',type:'sets',sets:3,restBetween:60,exercises:[
+          {name:'Single Leg Extensions',detail:'3×16 each leg — Rest :60'}]},
+        {title:'Set 6 — DB Walking Lunges',type:'amrap',duration:300,exercises:[
+          {name:'DB Walking Lunges',detail:'AMRAP 5 min — Rest only as needed. Drop weight as necessary.'}]}]},
+    { day:4, label:'ARMS', note:'50 morning burpees. No rest between circuit exercises. 2 min rest between circuits. Cardio: burn 350 cal.',
+      blocks:[
+        {title:'Circuit 1',type:'circuit',rounds:6,restAfter:120,exercises:[
+          {name:'Standing Bar Curls',detail:'x12'},
+          {name:'Knee to Chest Crunch',detail:'x12'},
+          {name:'Bench Dips',detail:'x12'}]},
+        {title:'Circuit 2',type:'circuit',rounds:6,restAfter:120,exercises:[
+          {name:'DB Curls',detail:'x10'},
+          {name:'Rope Triceps Pushdown',detail:'x12'},
+          {name:'Cable Crunch',detail:'x12'}]},
+        {title:'Circuit 3',type:'circuit',rounds:6,restAfter:120,exercises:[
+          {name:'Seated DB Hammer Curls',detail:'x10'},
+          {name:'DB Skull Crushers',detail:'x12'},
+          {name:'Flutter Kicks',detail:'x20 each leg'}]},
+        {title:'Set 4 — Tricep Pushdown',type:'sets',sets:3,restBetween:60,exercises:[
+          {name:'Tricep Pushdown',detail:'3×16 — Rest :60'}]},
+        {title:'Set 5 — Isometric Bicep Hold',type:'hold',sets:3,restBetween:60,exercises:[
+          {name:'Isometric Bicep Plate Hold',detail:'Hold 30 sec — Rest :60 — Repeat x3'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:5, label:'FUNCTIONAL', note:'50 morning burpees. No gym required! Perform as many rounds as possible in 21 minutes.',
+      blocks:[
+        {title:'Full Circuit — AMRAP 21 min',type:'circuit',rounds:21,restAfter:0,exercises:[
+          {name:'Jumping Jacks',detail:'x20'},
+          {name:'Air Squats',detail:'x12'},
+          {name:'Flutter Kicks',detail:'x20 each leg'},
+          {name:'Burpees',detail:'x8'}]}]},
+    { day:6, label:'BACK', note:'50 morning burpees. Cardio: burn 350 cal.',
+      blocks:[
+        {title:'Set 1 — Lat Pulldown',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'Lat Pulldown',detail:'4×16 — Rest :60'}]},
+        {title:'Set 2 — Seated Cable Rows',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'Seated Cable Rows',detail:'4×16 — Rest :60'}]},
+        {title:'Set 3 — DB Deadlift',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'DB Deadlift',detail:'4×12 — Rest :60'}]},
+        {title:'Set 4 — Assisted Pull-Ups',type:'sets',sets:3,restBetween:60,exercises:[
+          {name:'Assisted Pull-Ups',detail:'3×10 — Rest :60'}]},
+        {title:'Set 5 — Straight Arm Pull-Down',type:'amrap',duration:240,exercises:[
+          {name:'Straight Arm Pull-Down',detail:'AMRAP 4 min'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:7, label:'CARDIO', note:'50 morning burpees. Burn 350 calories OR walk 45 min outdoors.',
+      blocks:[{title:'Cardio',type:'cardio'}]}
+  ]},
+  // WEEK 2
+  { label:'WEEK 2', days:[
+    { day:8, label:'CHEST', note:'50 morning burpees. Warm up included. Cardio: burn 350 cal or walk 45 min.',
+      blocks:[
+        {title:'Set 1 (SS) — Flat DB Press + DB Flys',type:'sets',sets:4,restBetween:90,note:'Superset',exercises:[
+          {name:'Flat Dumbbell Press',detail:'4×12'},
+          {name:'Dumbbell Flys',detail:'4×10 — no rest between; rest :90 between sets'}]},
+        {title:'Set 2 (DS) — Hammer/Incline Machine Press',type:'sets',sets:4,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Hammer Strength Incline / Incline Machine Press',detail:'4×12,10 — drop weight :90 between sets'}]},
+        {title:'Set 3 (DS) — Pec Dec',type:'sets',sets:4,restBetween:60,note:'Drop Set',exercises:[
+          {name:'Pec Dec',detail:'4×10,8 — drop weight, rest :60 between sets'}]},
+        {title:'Set 4 — Plyo Box / Bench Step Ups',type:'amrap',duration:240,exercises:[
+          {name:'Plyo Box / Bench Step Ups',detail:'AMRAP 4 min'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:9, label:'REST', rest:true, blocks:[]},
+    { day:10, label:'SHOULDERS', note:'50 morning burpees. Cardio: burn 350 cal or walk 45 min.',
+      blocks:[
+        {title:'Set 1 (SS) — Side Lateral + Front Raise',type:'sets',sets:4,restBetween:90,note:'Superset',exercises:[
+          {name:'DB Side Lateral Raise',detail:'4×12'},
+          {name:'DB Front Raise',detail:'4×10 — no rest between; :90 between sets'}]},
+        {title:'Set 2 (SS) — Standing DB Press + Rear Delt',type:'sets',sets:3,restBetween:90,note:'Superset',exercises:[
+          {name:'Standing DB Press',detail:'3×10'},
+          {name:'DB Rear Delt Raise',detail:'3×10 — no rest between; :90 between sets'}]},
+        {title:'Set 3 (DS) — Machine Side Lateral Raise',type:'sets',sets:3,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Machine Side Lateral Raise',detail:'3×12,10 — drop weight, rest :90'}]},
+        {title:'Set 4 — Dumbbell Shrugs',type:'sets',sets:3,restBetween:60,exercises:[
+          {name:'Dumbbell Shrugs',detail:'3×12 — rest :60'}]},
+        {title:'Set 5 (DS) — Cable Crunches',type:'sets',sets:3,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Cable Crunches',detail:'3×15,10 — drop weight, rest :90'}]},
+        {title:'Set 6 — Ball Slams',type:'amrap',duration:300,exercises:[
+          {name:'Ball Slams',detail:'AMRAP 5 min'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:11, label:'LEGS', note:'50 morning burpees. No cardio today.',
+      blocks:[
+        {title:'Set 1 (SS) — Leg Extensions + Air Squats',type:'sets',sets:4,restBetween:90,note:'Superset',exercises:[
+          {name:'Leg Extensions',detail:'4×12'},
+          {name:'Air Squats',detail:'4×10 — no rest between; :90 between sets'}]},
+        {title:'Set 2 (SS) — Leg Press + Flutter Kicks',type:'sets',sets:4,restBetween:90,note:'Superset',exercises:[
+          {name:'Leg Press',detail:'4×12'},
+          {name:'Flutter Kicks',detail:'4×15 ea leg — no rest between; :90 between sets'}]},
+        {title:'Set 3 — Hamstring Curls',type:'sets',sets:3,restBetween:60,exercises:[
+          {name:'Hamstring Curls',detail:'3×12 — rest :60'}]},
+        {title:'Set 4 (DS) — Leg Extensions',type:'sets',sets:3,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Leg Extensions',detail:'3×12,8 — drop weight, rest :90'}]}]},
+    { day:12, label:'ARMS', note:'50 morning burpees. Cardio: burn 350 cal or walk 45 min.',
+      blocks:[
+        {title:'Set 1 (SS) — EZ Bar Pushdown + Curls',type:'sets',sets:4,restBetween:60,note:'Superset',exercises:[
+          {name:'EZ Bar Cable Pushdown',detail:'4×12'},
+          {name:'EZ Bar Cable Curls',detail:'4×12 — no rest between; :60 between sets'}]},
+        {title:'Set 2 (SS) — Hammer Curls + Skull Crushers',type:'sets',sets:4,restBetween:60,note:'Superset',exercises:[
+          {name:'DB Hammer Curls',detail:'4×12'},
+          {name:'DB Skull Crushers',detail:'4×12 — no rest between; :60 between sets'}]},
+        {title:'Set 3 (SS) — Bench Dips + DB Curls',type:'sets',sets:3,restBetween:60,note:'Superset',exercises:[
+          {name:'Bench Dips',detail:'3×12'},
+          {name:'DB Curls',detail:'3×10 — no rest between; :60 between sets'}]},
+        {title:'Set 4 (SS) — Rope Pushdown + Hammer Plate Curl',type:'sets',sets:3,restBetween:60,note:'Superset',exercises:[
+          {name:'Rope Cable Pushdown',detail:'3×12'},
+          {name:'Hammer Plate Curl',detail:'3×10 — no rest between; :60 between sets'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:13, label:'CARDIO+ABS', note:'50 morning burpees. Cardio: burn 500 cal or walk 60 min.',
+      blocks:[
+        {title:'Set 1 — Crunches',type:'sets',sets:4,restBetween:45,exercises:[
+          {name:'Crunches',detail:'4×20 — rest :45'}]},
+        {title:'Set 2 — Cable Crunches',type:'sets',sets:3,restBetween:45,exercises:[
+          {name:'Cable Crunches',detail:'3×16 — rest :45'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:14, label:'BACK', note:'50 morning burpees. No cardio today.',
+      blocks:[
+        {title:'Set 1 — Lat Pulldown',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'Lat Pulldown',detail:'4×16 — rest :60'}]},
+        {title:'Set 2 (DS) — Seated Cable Rows',type:'sets',sets:3,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Seated Cable Rows',detail:'3×12,8 — drop weight, rest :90'}]},
+        {title:'Set 3 — Low Back Extension',type:'sets',sets:3,restBetween:60,exercises:[
+          {name:'Low Back Extension',detail:'3×16 — rest :60'}]},
+        {title:'Set 4 (DS) — Close-Grip Pulldowns',type:'sets',sets:3,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Close-Grip Pulldowns',detail:'3×12,8 — drop weight, rest :90'}]},
+        {title:'Set 5 — Single Arm DB Row',type:'sets',sets:3,restBetween:45,exercises:[
+          {name:'Single Arm DB Row',detail:'3×12 ea arm — rest :45'}]}]}
+  ]},
+  // WEEK 3
+  { label:'WEEK 3', days:[
+    { day:15, label:'CHEST', note:'50 morning burpees. Warm-up: 5 min rower. Cardio: burn 450 cal — write your time and beat it next session.',
+      blocks:[
+        {title:'Set 1 (Circuit) — 3 Exercises',type:'circuit',rounds:4,restAfter:0,exercises:[
+          {name:'Incline DB Press',detail:'x12'},
+          {name:'Incline DB Fly',detail:'x12'},
+          {name:'Air Squats',detail:'x12'}]},
+        {title:'Set 2 (DS) — Chest Press Machine',type:'sets',sets:4,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Chest Press Machine',detail:'4×12,8 — drop weight, rest :90'}]},
+        {title:'Set 3 (DS) — Pec Dec',type:'sets',sets:4,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Pec Dec',detail:'4×12,8 — drop weight, rest :90'}]},
+        {title:'Set 4 — Burpees',type:'amrap',duration:300,exercises:[
+          {name:'Burpees',detail:'AMRAP 5 min — Fall on your face & get back up. DO NOT stop moving.'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:16, label:'REST', rest:true, blocks:[]},
+    { day:17, label:'LEGS', note:'50 morning burpees. Warm-up: 5 min bike + 50 bodyweight squats. No cardio today.',
+      blocks:[
+        {title:'Set 1 (SS) — Leg Press + Calf Extension',type:'sets',sets:4,restBetween:90,note:'Superset',exercises:[
+          {name:'Leg Press',detail:'4×16'},
+          {name:'Calf Extension',detail:'4×12 — no rest between; :90 between sets'}]},
+        {title:'Set 2 (DS) — Leg Extensions',type:'sets',sets:4,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Leg Extensions',detail:'4×12,8 — drop weight, rest :90'}]},
+        {title:'Set 3 — DB Walking Lunges',type:'sets',sets:3,restBetween:90,exercises:[
+          {name:'DB Walking Lunges',detail:'3×12 each leg — rest :90'}]},
+        {title:'Set 4 (SS) — DB Squats + Flutter Kicks',type:'sets',sets:3,restBetween:90,note:'Superset',exercises:[
+          {name:'DB Squats',detail:'3×10'},
+          {name:'Flutter Kicks',detail:'3×30 — no rest between; :90 between sets'}]}]},
+    { day:18, label:'SHOULDERS', note:'50 morning burpees. Warm-up: 5 min rower + high rows to chin. Cardio: burn 450 cal — beat your last time.',
+      blocks:[
+        {title:'Set 1 — Cable Crunches',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'Cable Crunches',detail:'4×16 — rest :60'}]},
+        {title:'Set 2 — Sit Ups',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'Sit Ups',detail:'4×15 — rest :60'}]},
+        {title:'Set 3 (Circuit) — Shoulders',type:'circuit',rounds:4,restAfter:0,exercises:[
+          {name:'DB Side Lateral Raises',detail:'x12'},
+          {name:'DB Front Raises',detail:'x10'},
+          {name:'Jumping Jacks',detail:'x25'}]},
+        {title:'Set 4 (DS) — Machine Shoulder Press',type:'sets',sets:3,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Machine Shoulder Press',detail:'3×12,8 — drop weight, rest :90'}]},
+        {title:'Set 5 — DB Shoulder Shrugs',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'DB Shoulder Shrugs',detail:'4×10 — rest :60'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:19, label:'ARMS', note:'50 morning burpees. Warm-up: 5 min rower, underhand grip. Cardio: burn 450 cal — set a PR today.',
+      blocks:[
+        {title:'Set 1 (SS) — Bar Curls + Pushdown',type:'sets',sets:4,restBetween:90,note:'Superset',exercises:[
+          {name:'Straight Bar Cable Curls',detail:'4×12'},
+          {name:'Straight Bar Cable Pushdown',detail:'4×12 — no rest between; :90 between sets'}]},
+        {title:'Set 2 (DS) — Tricep Cable Pushdowns',type:'sets',sets:4,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Tricep Cable Pushdowns',detail:'4×12,10 — drop weight, rest :90'}]},
+        {title:'Set 3 (DS) — Hammer Curls',type:'sets',sets:4,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Hammer Curls',detail:'4×12,10 — drop weight, rest :90'}]},
+        {title:'Set 4 (Circuit)',type:'circuit',rounds:4,restAfter:0,exercises:[
+          {name:'DB Curls',detail:'x8 each arm'},
+          {name:'Bench Dips',detail:'x10'},
+          {name:'Med Ball Slams',detail:'x8'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:20, label:'CARDIO', note:'50 morning burpees. Cardio: burn 450 cal — can you beat yesterday\'s PR?',
+      blocks:[{title:'Cardio',type:'cardio'}]},
+    { day:21, label:'BACK', note:'50 morning burpees. Warm-up: 5 min elliptical, focus on pulling motion.',
+      blocks:[
+        {title:'Set 1 — Close Grip Lat Pulldown',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'Close Grip Lat Pulldown',detail:'4×16 — rest :60'}]},
+        {title:'Set 2 (DS) — Seated Cable Rows',type:'sets',sets:4,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Seated Cable Rows',detail:'4×12,10 — drop weight, rest :90'}]},
+        {title:'Set 3 — Assisted Pull-Ups',type:'sets',sets:4,restBetween:90,exercises:[
+          {name:'Assisted Pull-Ups',detail:'4×10 — rest :90'}]},
+        {title:'Set 4 — Lat Pulldown AMRAP',type:'amrap',duration:300,exercises:[
+          {name:'Lat Pulldown',detail:'AMRAP 5 min — aim for at least 75 reps'}]},
+        {title:'Cardio (HIIT — Rower)',type:'cardio',note:'30 sec sprint / 30 sec rest × 10 rounds'}]}
+  ]},
+  // WEEK 4
+  { label:'WEEK 4', days:[
+    { day:22, label:'CHEST', note:'50 morning burpees. Warm-up: 6 min elliptical. Cardio: HIIT Rower :30 sprint / :30 rest × 12 rounds.',
+      blocks:[
+        {title:'Set 1 — Hammer Strength Chest Press',type:'sets',sets:5,restBetween:60,exercises:[
+          {name:'Hammer Strength Chest Press',detail:'5×12 — rest :60'}]},
+        {title:'Set 2 (DS) — Pec Dec / Machine Flys',type:'sets',sets:4,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Pec Dec or Machine Flys',detail:'4×16,12 — drop weight, rest :90'}]},
+        {title:'Set 3 (DS) — DB Incline Press',type:'sets',sets:4,restBetween:90,note:'Drop Set — Train to failure sets 3+4',exercises:[
+          {name:'DB Incline Press',detail:'4×12,8 — train to complete failure, rest :90'}]},
+        {title:'Set 4 (DS) — DB Flys',type:'sets',sets:3,restBetween:90,note:'Drop Set',exercises:[
+          {name:'DB Flys',detail:'3×12,8 — drop weight, rest :90'}]},
+        {title:'Cardio (HIIT)',type:'cardio',note:'Rower: :30 sprint, :30 rest × 12 rounds'}]},
+    { day:23, label:'REST', rest:true, blocks:[]},
+    { day:24, label:'LEGS', note:'50 morning burpees. Warm-up: 50 bodyweight squats + 50 jumping jacks. No cardio today.',
+      blocks:[
+        {title:'Set 1 — Leg Press',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'Leg Press',detail:'4×12 — rest :60'}]},
+        {title:'Set 2 (DS) — Leg Extensions',type:'sets',sets:4,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Leg Extensions',detail:'4×10,8 — drop weight, rest :90'}]},
+        {title:'Set 3 (DS) — Hip Adductors',type:'sets',sets:3,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Hip Adductors',detail:'3×12,8 — drop weight, rest :90'}]},
+        {title:'Set 4 (DS) — Hip Abductors',type:'sets',sets:3,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Hip Abductors',detail:'3×12,8 — drop weight, rest :90'}]},
+        {title:'Set 5 — DB Walking Lunges',type:'amrap',duration:300,exercises:[
+          {name:'DB Walking Lunges',detail:'AMRAP 5 min — drop weight as needed'}]}]},
+    { day:25, label:'SHOULDERS', note:'50 morning burpees. Warm-up: 6 min rower, high rows to chin. Cardio: burn 225 cal elliptical (legs only) + 225 cal treadmill 3.0mph/10.0 incline.',
+      blocks:[
+        {title:'Set 1 — Sit Ups',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'Sit Ups',detail:'4×16 — rest :60'}]},
+        {title:'Set 2 — Reverse Crunches',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'Reverse Crunches',detail:'4×16 — rest :60'}]},
+        {title:'Set 3 — Straight Bar Front Raise',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'Straight Bar Front Raise',detail:'4×12 — rest :60'}]},
+        {title:'Set 4 (DS) — Machine Side Lateral Raises',type:'sets',sets:4,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Machine Side Lateral Raises',detail:'4×16,12 — drop weight, rest :90'}]},
+        {title:'Set 5 (DS) — Standing DB Press',type:'sets',sets:4,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Standing DB Press',detail:'4×12,8 — drop weight, rest :90'}]},
+        {title:'Set 6 — Reverse Pec Deck Fly',type:'amrap',duration:300,exercises:[
+          {name:'Reverse Pec Deck Fly',detail:'AMRAP 5 min'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:26, label:'ARMS', note:'50 morning burpees. Warm-up: 6 min rower, underhand grip. Cardio: HIIT Rower :30 sprint / :30 rest × 12 rounds.',
+      blocks:[
+        {title:'Set 1 — Straight Bar Curls',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'Straight Bar Curls',detail:'4×16 — rest :60'}]},
+        {title:'Set 2 — Tricep Cable Push Down',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'Tricep Cable Push Down',detail:'4×16 — rest :60'}]},
+        {title:'Set 3 (DS) — EZ Bar Cable Curls',type:'sets',sets:3,restBetween:90,note:'Drop Set',exercises:[
+          {name:'EZ Bar Cable Curls',detail:'3×12,8 — drop weight, rest :90'}]},
+        {title:'Set 4 (DS) — Overhead Cable Extensions',type:'sets',sets:3,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Overhead Cable Extensions',detail:'3×12,8 — drop weight, rest :90'}]},
+        {title:'Set 5 (DS) — DB Hammer Curls',type:'sets',sets:3,restBetween:90,note:'Drop Set',exercises:[
+          {name:'DB Hammer Curls',detail:'3×12,8 — drop weight, rest :90'}]},
+        {title:'Set 6 (DS) — Rope Push Down',type:'sets',sets:3,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Rope Push Down',detail:'3×12,8 — drop weight, rest :90'}]},
+        {title:'Cardio (HIIT)',type:'cardio',note:'Rower: :30 sprint, :30 rest × 12 rounds'}]},
+    { day:27, label:'CARDIO', note:'50 morning burpees. 1 hour of cardio — how many calories can you burn in 60 minutes?',
+      blocks:[{title:'Cardio — 60 min',type:'cardio'}]},
+    { day:28, label:'BACK', note:'50 morning burpees. Warm-up: 6 min elliptical. Cardio: burn 450 cal — SMASH your old PR today. Close out Week 4!',
+      blocks:[
+        {title:'Set 1 — Assisted Pull Ups',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'Assisted Pull Ups',detail:'4×12 — slow & controlled down, rest :60'}]},
+        {title:'Set 2 (DS) — Cable Rows',type:'sets',sets:4,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Cable Rows',detail:'4×12,10 — drop weight, rest :90'}]},
+        {title:'Set 3 (DS) — Close Grip Lat Pulldowns',type:'sets',sets:3,restBetween:90,note:'Drop Set',exercises:[
+          {name:'Close Grip Lat Pulldowns',detail:'3×12,10 — drop weight, rest :90'}]},
+        {title:'Set 4 — Bent Over DB Rows',type:'sets',sets:3,restBetween:60,exercises:[
+          {name:'Bent Over DB Rows',detail:'3×12 — rest :60'}]},
+        {title:'Set 5 — Lat Pulldowns AMRAP',type:'amrap',duration:300,exercises:[
+          {name:'Lat Pulldowns',detail:'AMRAP 5 min — aim for 60-80 reps'}]},
+        {title:'Cardio',type:'cardio'}]}
+  ]},
+  // WEEK 5
+  { label:'WEEK 5', days:[
+    { day:29, label:'CHEST', note:'50 morning burpees. Warm-up: 5 min rower. Cardio: burn 550 cal.',
+      blocks:[
+        {title:'Circuit 1',type:'circuit',rounds:3,restAfter:120,exercises:[
+          {name:'DB Incline Flys',detail:'x12'},
+          {name:'Sit Ups',detail:'x10'},
+          {name:'DB Incline Press',detail:'x10'}]},
+        {title:'Circuit 2',type:'circuit',rounds:3,restAfter:120,exercises:[
+          {name:'DB Chest Press',detail:'x12'},
+          {name:'Push Ups / Knee Push Ups',detail:'x8'},
+          {name:'Jumping Jacks',detail:'x15'}]},
+        {title:'Set 3 — Machine Chest Press',type:'sets',sets:4,restBetween:90,exercises:[
+          {name:'Machine Chest Press',detail:'4×12 — rest :90'}]},
+        {title:'Set 4 — Machine / Cable Flys',type:'amrap',duration:240,exercises:[
+          {name:'Machine or Cable Flys',detail:'AMRAP 4 min'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:30, label:'REST', rest:true, blocks:[]},
+    { day:31, label:'LEGS', note:'50 morning burpees. Warm-up: 5 min bike + 100 flutter kicks. No cardio today.',
+      blocks:[
+        {title:'Set 1 — Bodyweight Squats',type:'sets',sets:1,restBetween:0,exercises:[
+          {name:'Bodyweight Squats',detail:'75 total reps'}]},
+        {title:'Set 2 — Leg Extensions',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'Leg Extensions',detail:'4×16 — rest :60'}]},
+        {title:'Set 3 — Leg Press',type:'sets',sets:4,restBetween:90,exercises:[
+          {name:'Leg Press',detail:'4×12 — rest :90, increase weight each set'}]},
+        {title:'Set 4 — Calf Extensions',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'Calf Extensions',detail:'4×12 — rest :60'}]},
+        {title:'Set 5 — DB Walking Lunges',type:'amrap',duration:300,exercises:[
+          {name:'DB Walking Lunges',detail:'AMRAP 5 min — drop weight as needed. JUST KEEP MOVING.'}]}]},
+    { day:32, label:'SHOULDERS', note:'50 morning burpees. Warm-up: 5 min rower, high rows to chin. Cardio: burn 550 cal.',
+      blocks:[
+        {title:'Circuit 1',type:'circuit',rounds:3,restAfter:120,exercises:[
+          {name:'Side Lateral Raise',detail:'x12'},
+          {name:'Ball Slams',detail:'x8'},
+          {name:'Front Plate Raise',detail:'x10'}]},
+        {title:'Circuit 2',type:'circuit',rounds:3,restAfter:120,exercises:[
+          {name:'Seated DB Press',detail:'x12'},
+          {name:'Flutter Kicks',detail:'x12 each leg'},
+          {name:'Bent Over Lateral Raise',detail:'x12'}]},
+        {title:'Circuit 3',type:'circuit',rounds:3,restAfter:120,exercises:[
+          {name:'Cable Upright Row',detail:'x12'},
+          {name:'Low Cable Bent Over Row',detail:'x8'},
+          {name:'DB Shrugs',detail:'x10'}]},
+        {title:'Set 4 — Machine Side Lateral Raises',type:'sets',sets:3,restBetween:90,exercises:[
+          {name:'Machine Side Lateral Raises',detail:'3×20 — rest :90'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:33, label:'ARMS', note:'50 morning burpees. Warm-up: 5 min rower, underhand grip. Cardio: burn 550 cal.',
+      blocks:[
+        {title:'Circuit 1',type:'circuit',rounds:3,restAfter:120,exercises:[
+          {name:'Standing Bar Curls',detail:'x10'},
+          {name:'Knee-to-Chest Crunch',detail:'x10'},
+          {name:'Bench Dips',detail:'x10'}]},
+        {title:'Circuit 2',type:'circuit',rounds:3,restAfter:120,exercises:[
+          {name:'DB Curls',detail:'x10'},
+          {name:'Rope Triceps Pushdown',detail:'x12'},
+          {name:'Cable Crunch',detail:'x12'}]},
+        {title:'Circuit 3',type:'circuit',rounds:3,restAfter:120,exercises:[
+          {name:'Seated DB Hammer Curls',detail:'x10'},
+          {name:'DB Skull Crusher',detail:'x12'},
+          {name:'Sit Ups',detail:'x12'}]},
+        {title:'Set 4 — Tricep Pushdown',type:'sets',sets:3,restBetween:60,exercises:[
+          {name:'Tricep Pushdown',detail:'3×16 — rest :60'}]},
+        {title:'Set 5 — Isometric Bicep Hold',type:'hold',sets:3,restBetween:60,exercises:[
+          {name:'Isometric Bicep Plate Hold',detail:'Hold :30 — Repeat x3 — rest :60'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:34, label:'BACK', note:'50 morning burpees. Warm-up: 5 min elliptical, focus on pulling motion.',
+      blocks:[
+        {title:'Set 1 — Lat Pulldown',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'Lat Pulldown',detail:'4×16 — rest :60'}]},
+        {title:'Set 2 — Seated Cable Rows',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'Seated Cable Rows',detail:'4×16 — rest :60'}]},
+        {title:'Set 3 — DB Deadlift',type:'sets',sets:4,restBetween:60,exercises:[
+          {name:'DB Deadlift',detail:'4×12 — rest :60'}]},
+        {title:'Set 4 — Assisted Pull-Ups',type:'sets',sets:3,restBetween:90,exercises:[
+          {name:'Assisted Pull-Ups',detail:'3×10 — rest :90'}]},
+        {title:'Set 5 — Straight Arm Pull-Down',type:'amrap',duration:240,exercises:[
+          {name:'Straight Arm Pull-Down',detail:'AMRAP 4 min'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:35, label:'FUNCTIONAL', note:'50 morning burpees. No gym needed. Outdoors preferred — bare feet on grass. EMOM 20 min.',
+      blocks:[
+        {title:'EMOM 20 min — Men',type:'circuit',rounds:20,restAfter:0,note:'Every Minute on the Minute',exercises:[
+          {name:'Min 1 — Air Squats',detail:'20 reps'},
+          {name:'Min 2 — Burpees',detail:'Max effort'},
+          {name:'Min 3 — Lunges',detail:'20 reps'},
+          {name:'Min 4 — Burpees',detail:'Max effort — Repeat for 20 min'}]},
+        {title:'EMOM 20 min — Women',type:'circuit',rounds:20,restAfter:0,note:'Every Minute on the Minute',exercises:[
+          {name:'Min 1 — Air Squats',detail:'16 reps'},
+          {name:'Min 2 — Burpees',detail:'Max effort'},
+          {name:'Min 3 — Lunges',detail:'16 reps (8 each leg)'},
+          {name:'Min 4 — Burpees',detail:'Max effort — Repeat for 20 min'}]}]}
+  ]},
+  // WEEK 6
+  { label:'WEEK 6 🔥', days:[
+    { day:36, label:'BURPEES+CARDIO', note:'PEAK WEEK. Water: 1.5 gallons. Sauna: 25-30 min (optional). Nutrition: add 8-10 shakes salt each meal. Reduce carbs 30-60g.',
+      blocks:[
+        {title:'Morning — 50 Burpees',type:'sets',sets:1,restBetween:0,exercises:[
+          {name:'Burpees',detail:'50 reps (morning)'}]},
+        {title:'Cardio — Burn 550 Cal',type:'cardio'},
+        {title:'Evening — 50 More Burpees',type:'sets',sets:1,restBetween:0,exercises:[
+          {name:'Burpees',detail:'50 more reps — 100 total today. Trust the process.'}]}]},
+    { day:37, label:'FULL BODY', note:'PEAK WEEK. Water: 2 gallons. Sauna: 25-30 min (optional). No rest between exercises or rounds within each set.',
+      blocks:[
+        {title:'Set 1 — Full Body Circuit',type:'circuit',rounds:4,restAfter:120,exercises:[
+          {name:'Straight Bar Cable Curls',detail:'x12'},
+          {name:'Tricep Rope Pushdown',detail:'x10'},
+          {name:'Flutter Kicks',detail:'x12'}]},
+        {title:'Set 2 — Chest Circuit',type:'circuit',rounds:4,restAfter:120,exercises:[
+          {name:'Machine Flys',detail:'x12'},
+          {name:'Machine Reverse Fly',detail:'x10'}]},
+        {title:'Set 3 — Back + Shoulders Circuit',type:'circuit',rounds:4,restAfter:120,exercises:[
+          {name:'Seated Rows',detail:'x10'},
+          {name:'DB Side Lateral Raise',detail:'x12'}]},
+        {title:'Set 4 — Legs Circuit',type:'circuit',rounds:3,restAfter:0,exercises:[
+          {name:'Leg Press',detail:'x12'},
+          {name:'Bodyweight Squats',detail:'x12'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:38, label:'FULL BODY', note:'PEAK WEEK. Water: 2 gallons. Sauna: 25-30 min (optional). No rest between exercises or rounds.',
+      blocks:[
+        {title:'Set 1',type:'circuit',rounds:4,restAfter:120,exercises:[
+          {name:'Hammer Strength Incline Press',detail:'x12'},
+          {name:'Ball Slams',detail:'x10'}]},
+        {title:'Set 2',type:'circuit',rounds:4,restAfter:120,exercises:[
+          {name:'DB Front Raises',detail:'x12'},
+          {name:'Bent Over DB Rows',detail:'x10'}]},
+        {title:'Set 3',type:'circuit',rounds:3,restAfter:120,exercises:[
+          {name:'Hammer Curls',detail:'x12'},
+          {name:'Overhead Cable Extensions',detail:'x10'}]},
+        {title:'Set 4 (SS) — Legs',type:'circuit',rounds:3,restAfter:120,exercises:[
+          {name:'Leg Extensions',detail:'x16'},
+          {name:'Lunges',detail:'x10 ea leg'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:39, label:'FULL BODY', note:'PEAK WEEK. Water: 2 gallons. Sauna: 25-30 min (optional). No rest between exercises or rounds.',
+      blocks:[
+        {title:'Set 1',type:'circuit',rounds:4,restAfter:120,exercises:[
+          {name:'DB Bicep Curls',detail:'x12 ea arm'},
+          {name:'Bench Dips',detail:'x12'}]},
+        {title:'Set 2',type:'circuit',rounds:4,restAfter:120,exercises:[
+          {name:'Lat Pulldowns',detail:'x12'},
+          {name:'DB Shrugs',detail:'x10'}]},
+        {title:'Set 3',type:'circuit',rounds:4,restAfter:120,exercises:[
+          {name:'DB Chest Press',detail:'x12'},
+          {name:'DB Flys',detail:'x10'}]},
+        {title:'Set 4 — Legs',type:'circuit',rounds:3,restAfter:120,exercises:[
+          {name:'Hamstring Curls',detail:'x12'},
+          {name:'Bodyweight Squats',detail:'x10'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:40, label:'FULL BODY', note:'PEAK WEEK. Water: 1 gallon. Sauna: 25-30 min (optional). Nutrition: resume normal carbs, no extra salt.',
+      blocks:[
+        {title:'Set 1',type:'circuit',rounds:4,restAfter:120,exercises:[
+          {name:'Pec Dec',detail:'x12'},
+          {name:'Jumping Jacks',detail:'x20'}]},
+        {title:'Set 2',type:'circuit',rounds:4,restAfter:120,exercises:[
+          {name:'EZ Bar Curls',detail:'x12'},
+          {name:'Triceps Pushdown',detail:'x10'}]},
+        {title:'Set 3',type:'circuit',rounds:4,restAfter:120,exercises:[
+          {name:'DB Standing Shoulder Press',detail:'x12'},
+          {name:'Lat Pulldown',detail:'x10'}]},
+        {title:'Set 4 — Leg Extensions',type:'sets',sets:4,restBetween:90,exercises:[
+          {name:'Leg Extensions',detail:'4×20 — rest :90 between sets'}]},
+        {title:'Cardio',type:'cardio'}]},
+    { day:41, label:'CARDIO', note:'PEAK WEEK. Water: ½ gallon. Elliptical only — 45 min at moderate intensity. No strength training.',
+      blocks:[{title:'Elliptical — 45 min moderate',type:'cardio'}]},
+    { day:42, label:'DAY 42 🏆', rest:true,
+      note:'NO TRAINING OR CARDIO. Skip breakfast — take Day 42 pics & video shortly after waking. Drink minimal water before photos. Use bathroom first. You earned it. GO EAT A BIG CLEAN MEAL!',
+      blocks:[]}
+  ]}
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let curWeek = 0;
+let curDayIdx = 0; // index within week
+let history = JSON.parse(localStorage.getItem('ns_history')||'[]');
+let completedDays = JSON.parse(localStorage.getItem('ns_completed')||'{}');
+let workoutState = {};
+let timerIntervals = {};
+
+function saveHistory(){ localStorage.setItem('ns_history', JSON.stringify(history)); }
+function saveCompleted(){ localStorage.setItem('ns_completed', JSON.stringify(completedDays)); }
+function deepClone(o){ return JSON.parse(JSON.stringify(o)); }
+function uid(){ return Math.random().toString(36).slice(2,8); }
+function todayKey(){ return new Date().toDateString(); }
+
+function stateKey(wi,di){ return `${wi}_${di}`; }
+
+function initState(wi,di){
+  const key = stateKey(wi,di);
+  if(workoutState[key]) return;
+  const day = WEEKS[wi].days[di];
+  workoutState[key]={
+    notes:'',
+    blocks:(day.blocks||[]).map(b=>({
+      rounds:0,
+      exercises:(b.exercises||[]).map(()=>({done:false,weight:'',reps:''})),
+      sets:b.sets?Array(b.sets).fill(false):[],
+      setWeight:'',setReps:'',
+      cardioType:'',calories:'',duration:'',
+      timerRunning:false,timerMode:'work',
+      timeLeft: b.duration || b.restBetween || 90,
+      totalTime: b.duration || b.restBetween || 90
+    }))
+  };
+}
+
+// ─── TABS ────────────────────────────────────────────────────────────────────
+function switchTab(t,el){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById(t+'View').classList.add('active');
+  el.classList.add('active');
+  if(t==='workout') renderWorkout();
+  if(t==='history') renderHistory();
+  if(t==='progress') renderProgress();
+}
+
+// ─── WORKOUT VIEW ────────────────────────────────────────────────────────────
+function renderWorkout(){
+  const wi=curWeek, di=curDayIdx;
+  const week=WEEKS[wi], day=week.days[di];
+  initState(wi,di);
+  const st=workoutState[stateKey(wi,di)];
+  const logKey=`${wi}_${di}`;
+  const logged=completedDays[todayKey()]===logKey;
+
+  // Week selector
+  let h=`<div class="week-row">`;
+  WEEKS.forEach((w,i)=>{
+    h+=`<div class="wk-chip ${i===wi?'active':''}" onclick="selWeek(${i})">${w.label}</div>`;
+  });
+  h+=`</div>`;
+
+  // Day selector
+  h+=`<div class="day-scroll">`;
+  week.days.forEach((d,i)=>{
+    const dkey=`${wi}_${i}`;
+    const done=Object.values(completedDays).includes(dkey);
+    h+=`<div class="day-chip ${i===di?'active':''} ${d.rest?'rest':''} ${done&&i!==di?'done':''}" onclick="selDay(${i})">
+      <div class="dc-num">${d.day}</div>
+      <div class="dc-name">${d.label.split(' ')[0].substring(0,7)}</div>
+    </div>`;
+  });
+  h+=`</div>`;
+
+  // Header
+  h+=`<div class="wk-hdr">
+    <div class="wk-title">DAY ${day.day}: ${day.label}</div>
+    <div class="wk-sub">${week.label} &nbsp;·&nbsp; <span>${day.blocks?day.blocks.length:0} blocks</span></div>
+  </div>`;
+
+  if(day.note){
+    h+=`<div class="daily-note">${day.note}</div>`;
+  }
+
+  if(day.rest){
+    const isDay42=day.day===42;
+    h+=`<div class="rest-day">
+      <div class="rest-ico">${isDay42?'🏆':'😴'}</div>
+      <div class="rest-txt">${isDay42?'DAY 42':'REST DAY'}</div>
+      <div class="rest-sub">${isDay42?'Take your photos & video. You did it, Calvin.':'Recover. Eat well. Sleep. You earned it.'}</div>
+    </div>`;
+  } else {
+    (day.blocks||[]).forEach((bl,bi)=>{
+      h+=renderBlock(bl,bi,st.blocks[bi],wi,di);
+    });
+    h+=`<button class="log-btn ${logged?'logged':''}" onclick="logWorkout()">${logged?'✓ LOGGED':'LOG WORKOUT'}</button>`;
+    h+=`<textarea class="notes-area" rows="3" placeholder="Session notes..." onchange="updateNotes(this.value)">${st.notes}</textarea>`;
+  }
+
+  document.getElementById('workoutView').innerHTML=h;
+}
+
+function renderBlock(bl,bi,bs,wi,di){
+  const badgeMap={circuit:'badge-circuit',amrap:'badge-amrap',sets:'badge-sets',cardio:'badge-cardio',hold:'badge-hold'};
+  const labelMap={circuit:'CIRCUIT',amrap:'AMRAP',sets:'SETS',cardio:'CARDIO',hold:'HOLD'};
+  let h=`<div class="block" id="BL${bi}">
+    <div class="block-hdr">
+      <div class="block-title">${bl.title}</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">
+        <div class="badge ${badgeMap[bl.type]||'badge-sets'}">${labelMap[bl.type]||bl.type.toUpperCase()}</div>
+        ${bl.note?`<div class="badge badge-ds">${bl.note}</div>`:''}
+      </div>
+    </div>`;
+
+  if(bl.type==='circuit'||bl.type==='amrap'){
+    const workT=bl.duration||bl.rounds*60||360;
+    const restT=bl.restAfter||0;
+    h+=renderTimer(bi,bs,workT,restT);
+  }
+  if(bl.type==='cardio'){
+    h+=renderCardio(bi,bs,bl.note||'');
+  } else if(bl.type==='sets'||bl.type==='hold'){
+    h+=renderSets(bl,bi,bs);
+  } else if(bl.exercises&&bl.exercises.length){
+    h+=`<div class="ex-list">`;
+    bl.exercises.forEach((ex,ei)=>h+=renderEx(ex,bi,ei,bs.exercises[ei]));
+    h+=`</div>`;
+  }
+  if(bl.type==='circuit'||bl.type==='amrap'){
+    h+=renderRounds(bi,bs);
+  }
+  h+=`</div>`;
+  return h;
+}
+
+function renderTimer(bi,bs,workT,restT){
+  const t=bs.timeLeft,total=bs.totalTime||workT;
+  const r=18,circ=2*Math.PI*r;
+  const offset=circ*(1-(t/total));
+  const mins=Math.floor(t/60),secs=String(t%60).padStart(2,'0');
+  const isRest=bs.timerMode==='rest';
+  const warn=t<=10&&t>0&&bs.timerRunning;
+  return `<div class="timer-row">
+    <div class="timer-face"><svg viewBox="0 0 48 48"><circle class="ring-bg" cx="24" cy="24" r="${r}"/>
+    <circle class="${isRest?'ring-fill ring-rest':'ring-fill'}" id="ring_${bi}" cx="24" cy="24" r="${r}"
+      stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"/></svg>
+    <div class="timer-txt ${isRest?'rest-c':''} ${warn?'blink':''}" id="tmr_${bi}">${mins}:${secs}</div>
+    </div>
+    <div class="timer-ctrls">
+      <button class="tbtn tbtn-go" id="goBtn_${bi}" onclick="toggleTimer(${bi},${workT},${restT})">${bs.timerRunning?'PAUSE':'START'}</button>
+      <button class="tbtn tbtn-rst" onclick="resetTimer(${bi},${workT})">RESET</button>
+      ${restT?`<button class="tbtn tbtn-rest" onclick="startRest(${bi},${restT})">REST</button>`:''}
+    </div>
+  </div>`;
+}
+
+function renderEx(ex,bi,ei,es){
+  return `<div class="ex-row">
+    <div class="ex-chk ${es.done?'done':''}" id="chk_${bi}_${ei}" onclick="toggleEx(${bi},${ei})">
+      ${es.done?'<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>':''}
+    </div>
+    <div class="ex-body" onclick="toggleEx(${bi},${ei})">
+      <div class="ex-name ${es.done?'done':''}" id="exn_${bi}_${ei}">${ex.name}</div>
+      <div class="ex-detail">${ex.detail}</div>
+    </div>
+    <div class="ex-log">
+      <div class="log-field"><input class="log-inp" type="number" inputmode="decimal" placeholder="lbs" value="${es.weight}" onchange="logEx(${bi},${ei},'weight',this.value)"><div class="log-lbl">Wt</div></div>
+      <div class="log-field"><input class="log-inp" type="number" inputmode="numeric" placeholder="reps" value="${es.reps}" onchange="logEx(${bi},${ei},'reps',this.value)"><div class="log-lbl">Reps</div></div>
+    </div>
+  </div>`;
+}
+
+function renderSets(bl,bi,bs){
+  let h=`<div class="sets-body">
+    <div class="set-dots">`;
+  for(let i=0;i<(bl.sets||3);i++){
+    h+=`<div class="set-dot ${bs.sets[i]?'done':''}" id="sd_${bi}_${i}" onclick="toggleSet(${bi},${i},${bl.restBetween||0})">${bs.sets[i]?'✓':(i+1)}</div>`;
+  }
+  h+=`</div><div class="set-fields">
+    <div class="sf"><label>Weight (lbs)</label><input type="number" inputmode="decimal" value="${bs.setWeight}" placeholder="lbs" onchange="logSetField(${bi},'setWeight',this.value)"></div>
+    <div class="sf"><label>${bl.type==='hold'?'Duration (sec)':'Reps'}</label><input type="number" inputmode="numeric" value="${bs.setReps}" placeholder="${bl.type==='hold'?'sec':'reps'}" onchange="logSetField(${bi},'setReps',this.value)"></div>
+  </div></div>`;
+  if(bl.exercises&&bl.exercises.length){
+    h+=`<div class="ex-list">`;
+    bl.exercises.forEach((ex,ei)=>h+=renderEx(ex,bi,ei,bs.exercises[ei]));
+    h+=`</div>`;
+  }
+  return h;
+}
+
+function renderRounds(bi,bs){
+  return `<div class="rounds-row">
+    <div class="rounds-lbl">Rounds Completed</div>
+    <button class="rnd-btn" onclick="adjRounds(${bi},-1)">−</button>
+    <div class="rounds-val" id="rnds_${bi}">${bs.rounds}</div>
+    <button class="rnd-btn" onclick="adjRounds(${bi},1)">+</button>
+  </div>`;
+}
+
+function renderCardio(bi,bs,hint){
+  const opts=[
+    {id:'stairmaster',icon:'🏔️',name:'StairMaster',sub:'550 cal goal'},
+    {id:'elliptical',icon:'🔄',name:'Elliptical',sub:'550 cal goal'},
+    {id:'treadmill',icon:'🏃',name:'Treadmill',sub:'550 cal goal'},
+    {id:'walk',icon:'🚶',name:'Walk',sub:'45 min'}
+  ];
+  let h=`<div class="cardio-body">`;
+  if(hint) h+=`<div style="font-size:.7rem;color:var(--muted);margin-bottom:8px">${hint}</div>`;
+  h+=`<div class="cardio-grid">`;
+  opts.forEach(o=>{
+    h+=`<div class="c-opt ${bs.cardioType===o.id?'sel':''}" onclick="selCardio(${bi},'${o.id}')">
+      <div class="c-icon">${o.icon}</div><div class="c-name">${o.name}</div><div class="c-sub">${o.sub}</div>
+    </div>`;
+  });
+  h+=`</div><div class="cardio-stats">
+    <div class="cs-row"><div class="cs-lbl">Calories Burned</div><input class="cs-inp" type="number" inputmode="numeric" value="${bs.calories}" placeholder="cal" onchange="logCardio(${bi},'calories',this.value)"></div>
+    <div class="cs-row"><div class="cs-lbl">Duration (min)</div><input class="cs-inp" type="number" inputmode="numeric" value="${bs.duration}" placeholder="min" onchange="logCardio(${bi},'duration',this.value)"></div>
+  </div></div>`;
+  return h;
+}
+
+// Timer logic
+function toggleTimer(bi,workT,restT){
+  const bs=workoutState[stateKey(curWeek,curDayIdx)].blocks[bi];
+  if(bs.timerRunning){
+    clearInterval(timerIntervals[bi]); bs.timerRunning=false;
+    const btn=document.getElementById(`goBtn_${bi}`); if(btn) btn.textContent='START';
+  } else {
+    if(bs.timeLeft<=0) bs.timeLeft=bs.timerMode==='rest'?restT:workT;
+    bs.timerRunning=true;
+    const btn=document.getElementById(`goBtn_${bi}`); if(btn) btn.textContent='PAUSE';
+    timerIntervals[bi]=setInterval(()=>tick(bi,workT,restT),1000);
+  }
+}
+function tick(bi,workT,restT){
+  const bs=workoutState[stateKey(curWeek,curDayIdx)]?.blocks[bi]; if(!bs) return;
+  if(bs.timeLeft>0){ bs.timeLeft--; updateTimerDisplay(bi); }
+  else {
+    clearInterval(timerIntervals[bi]); bs.timerRunning=false;
+    if(bs.timerMode==='work'&&restT>0){
+      bs.timerMode='rest'; bs.timeLeft=restT; bs.totalTime=restT; bs.timerRunning=true;
+      toast('Work done! Resting...'); timerIntervals[bi]=setInterval(()=>tick(bi,workT,restT),1000);
+      const btn=document.getElementById(`goBtn_${bi}`); if(btn) btn.textContent='PAUSE';
+    } else {
+      bs.timerMode='work'; bs.timeLeft=workT; bs.totalTime=workT; toast('Done! 💪');
+      const btn=document.getElementById(`goBtn_${bi}`); if(btn) btn.textContent='START';
+    }
+    updateTimerDisplay(bi);
+  }
+}
+function updateTimerDisplay(bi){
+  const bs=workoutState[stateKey(curWeek,curDayIdx)]?.blocks[bi]; if(!bs) return;
+  const t=bs.timeLeft,total=bs.totalTime||1;
+  const mins=Math.floor(t/60),secs=String(t%60).padStart(2,'0');
+  const el=document.getElementById(`tmr_${bi}`),ring=document.getElementById(`ring_${bi}`);
+  if(el){ el.textContent=`${mins}:${secs}`; el.className=`timer-txt ${bs.timerMode==='rest'?'rest-c':''} ${t<=10&&t>0?'blink':''}`; }
+  if(ring){ const r=18,circ=2*Math.PI*r,offset=circ*(1-(t/total));
+    ring.style.strokeDashoffset=offset.toFixed(1);
+    ring.className.baseVal=`ring-fill ${bs.timerMode==='rest'?'ring-rest':''}`; }
+}
+function resetTimer(bi,workT){
+  const bs=workoutState[stateKey(curWeek,curDayIdx)].blocks[bi];
+  clearInterval(timerIntervals[bi]); bs.timerRunning=false; bs.timerMode='work';
+  bs.timeLeft=workT; bs.totalTime=workT;
+  const btn=document.getElementById(`goBtn_${bi}`); if(btn) btn.textContent='START';
+  updateTimerDisplay(bi);
+}
+function startRest(bi,restT){
+  const bs=workoutState[stateKey(curWeek,curDayIdx)].blocks[bi];
+  clearInterval(timerIntervals[bi]);
+  bs.timerMode='rest'; bs.timeLeft=restT; bs.totalTime=restT; bs.timerRunning=true;
+  timerIntervals[bi]=setInterval(()=>tick(bi,restT,0),1000);
+  const btn=document.getElementById(`goBtn_${bi}`); if(btn) btn.textContent='PAUSE';
+  updateTimerDisplay(bi);
+}
+function toggleEx(bi,ei){
+  const es=workoutState[stateKey(curWeek,curDayIdx)].blocks[bi].exercises[ei];
+  es.done=!es.done;
+  const chk=document.getElementById(`chk_${bi}_${ei}`),nm=document.getElementById(`exn_${bi}_${ei}`);
+  if(chk){ chk.classList.toggle('done',es.done); chk.innerHTML=es.done?'<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>':''; }
+  if(nm) nm.classList.toggle('done',es.done);
+}
+function logEx(bi,ei,f,v){ workoutState[stateKey(curWeek,curDayIdx)].blocks[bi].exercises[ei][f]=v; }
+function adjRounds(bi,d){ const bs=workoutState[stateKey(curWeek,curDayIdx)].blocks[bi]; bs.rounds=Math.max(0,bs.rounds+d); const el=document.getElementById(`rnds_${bi}`); if(el) el.textContent=bs.rounds; }
+function toggleSet(bi,si,restT){
+  const bs=workoutState[stateKey(curWeek,curDayIdx)].blocks[bi]; bs.sets[si]=!bs.sets[si];
+  const el=document.getElementById(`sd_${bi}_${si}`);
+  if(el){ el.classList.toggle('done',bs.sets[si]); el.textContent=bs.sets[si]?'✓':(si+1); }
+  if(bs.sets[si]&&restT&&si<bs.sets.length-1) startRest(bi,restT);
+}
+function logSetField(bi,f,v){ workoutState[stateKey(curWeek,curDayIdx)].blocks[bi][f]=v; }
+function selCardio(bi,type){
+  workoutState[stateKey(curWeek,curDayIdx)].blocks[bi].cardioType=type;
+  document.querySelectorAll(`#BL${bi} .c-opt`).forEach((el,i)=>el.classList.toggle('sel',['stairmaster','elliptical','treadmill','walk'][i]===type));
+}
+function logCardio(bi,f,v){ workoutState[stateKey(curWeek,curDayIdx)].blocks[bi][f]=v; }
+function updateNotes(v){ workoutState[stateKey(curWeek,curDayIdx)].notes=v; }
+function selWeek(i){ curWeek=i; curDayIdx=0; renderWorkout(); }
+function selDay(i){ curDayIdx=i; renderWorkout(); }
+
+function logWorkout(){
+  const logKey=`${curWeek}_${curDayIdx}`;
+  completedDays[todayKey()]=logKey; saveCompleted(); updateStreak();
+  const st=workoutState[stateKey(curWeek,curDayIdx)];
+  const day=WEEKS[curWeek].days[curDayIdx];
+  const entry={date:new Date().toISOString(),week:curWeek+1,day:day.day,dayLabel:day.label,weekLabel:WEEKS[curWeek].label,notes:st.notes||'',
+    blocks:st.blocks.map((bs,bi)=>({title:(day.blocks[bi]||{}).title||'',rounds:bs.rounds,setsCompleted:bs.sets.filter(Boolean).length,calories:bs.calories}))};
+  history.unshift(entry); saveHistory(); toast('Workout logged! 🔥'); renderWorkout();
+}
+
+function updateStreak(){
+  const keys=Object.keys(completedDays).sort((a,b)=>new Date(b)-new Date(a));
+  let streak=0,check=new Date(); check.setHours(0,0,0,0);
+  for(let k of keys){ const d=new Date(k); d.setHours(0,0,0,0); if(d.getTime()===check.getTime()){ streak++; check.setDate(check.getDate()-1); } else break; }
+  document.getElementById('streakEl').innerHTML=`${streak} 🔥<small>Streak</small>`;
+}
+
+// ─── HISTORY ─────────────────────────────────────────────────────────────────
+function renderHistory(){
+  const el=document.getElementById('historyView');
+  if(!history.length){ el.innerHTML=`<div class="empty"><div class="empty-ico">📋</div><div class="empty-txt">No workouts logged yet.</div></div>`; return; }
+  let h=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div class="sec-title">HISTORY</div>
+    <button onclick="clearHistory()" style="background:none;border:1px solid var(--red);color:var(--red);border-radius:6px;padding:6px 12px;font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer">Clear All</button>
+  </div>`;
+  history.forEach(e=>{
+    const dt=new Date(e.date);
+    const ds=dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    const ts=dt.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    const rounds=e.blocks.reduce((a,b)=>a+(b.rounds||0),0);
+    const sets=e.blocks.reduce((a,b)=>a+(b.setsCompleted||0),0);
+    const cals=e.blocks.find(b=>b.calories)?.calories||'—';
+    h+=`<div class="hist-card">
+      <div class="hist-date">${ds} · ${ts}</div>
+      <div class="hist-day">${e.weekLabel} — DAY ${e.day}: ${e.dayLabel}</div>
+      <div class="hist-stats">
+        <div class="hst"><div class="hst-val">${rounds}</div><div class="hst-lbl">Rounds</div></div>
+        <div class="hst"><div class="hst-val">${sets}</div><div class="hst-lbl">Sets Done</div></div>
+        <div class="hst"><div class="hst-val">${cals}</div><div class="hst-lbl">Cal</div></div>
+      </div>
+      ${e.notes?`<div class="hist-note">${e.notes}</div>`:''}
+    </div>`;
+  });
+  el.innerHTML=h;
+}
+function clearHistory(){
+  showModal(`<div class="modal-title">CLEAR HISTORY?</div>
+    <p style="color:var(--muted);font-size:.82rem;margin-bottom:14px">This will delete all logged workout history.</p>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" style="background:var(--red);color:#fff" onclick="doClear()">CLEAR</button>
+    </div>`);
+}
+function doClear(){ history=[]; saveHistory(); closeModal(); renderHistory(); toast('History cleared'); }
+
+// ─── PROGRESS ────────────────────────────────────────────────────────────────
+function renderProgress(){
+  const total=history.length;
+  const totalCals=history.reduce((a,h)=>{const c=parseInt(h.blocks.find(b=>b.calories)?.calories||0)||0; return a+c;},0);
+  const streak=parseInt(document.getElementById('streakEl').textContent)||0;
+  // Days completed out of 42
+  const daysLogged=new Set(history.map(h=>`${h.week}_${h.day}`)).size;
+
+  let h=`<div class="sec-title" style="margin-bottom:12px">PROGRESS</div>
+  <div class="stat-grid">
+    <div class="stat-tile"><div class="st-val">${total}</div><div class="st-lbl">Sessions Logged</div></div>
+    <div class="stat-tile"><div class="st-val">${streak}</div><div class="st-lbl">Day Streak</div></div>
+    <div class="stat-tile"><div class="st-val">${totalCals.toLocaleString()}</div><div class="st-lbl">Calories Burned</div></div>
+    <div class="stat-tile"><div class="st-val">${daysLogged}<span style="font-size:1rem;color:var(--muted)">/42</span></div><div class="st-lbl">Days Complete</div></div>
+  </div>
+  <div class="sec-title" style="margin-bottom:10px">LAST 7 DAYS</div>
+  <div class="bars">`;
+  for(let i=6;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const done=completedDays[d.toDateString()]!==undefined;
+    const lbl=d.toLocaleDateString('en-US',{weekday:'short'}).slice(0,1);
+    h+=`<div class="bar-wrap"><div class="bar-bg"><div class="bar-fill ${done?'':'empty'}" style="height:${done?100:8}%"></div></div><div class="bar-lbl">${lbl}</div></div>`;
+  }
+  h+=`</div>`;
+
+  // Weekly breakdown
+  h+=`<div class="sec-title" style="margin-bottom:10px">BY WEEK</div>
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:11px;overflow:hidden">`;
+  WEEKS.forEach((w,wi)=>{
+    const count=history.filter(h=>h.week===wi+1).length;
+    h+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border)">
+      <div style="font-size:.82rem;font-weight:500">${w.label}</div>
+      <div style="font-family:var(--font-d);font-size:1.2rem;color:var(--accent)">${count}×</div>
+    </div>`;
+  });
+  h+=`</div>`;
+  document.getElementById('progressView').innerHTML=h;
+}
+
+// ─── MODAL ───────────────────────────────────────────────────────────────────
+function showModal(c){ document.getElementById('modal').innerHTML=c; document.getElementById('modalOverlay').classList.add('open'); }
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('open'); }
+function closeModalIfBg(e){ if(e.target===document.getElementById('modalOverlay')) closeModal(); }
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2400); }
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+updateStreak();
+renderWorkout();
+</script>
+</body>
+</html>
